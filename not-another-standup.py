@@ -1,12 +1,8 @@
 import os
 import subprocess
 import random
-import urllib.request
-import json
 from datetime import datetime, timedelta
 import time
-
-WEBHOOK_URL = os.environ.get("STANDUP_WEBHOOK_URL", "https://hooks.slack.com/services/TU/WEBHOOK/REAL")
 
 CORPORATE_WORDS = [
     "optimizando la sinergia de microservicios",
@@ -25,30 +21,38 @@ def get_yesterday_commits():
     except Exception:
         return ""
 
-def generate_fake_standup():
+def generate_local_standup():
     commits = get_yesterday_commits()
     if not commits:
         excuse = random.choice(CORPORATE_WORDS)
         commits = f"- Analizando arquitectura de sistemas y {excuse}."
     
-    message = {
-        "text": f"🤖 *Standup Automático de Daedalus*:\n*Ayer hice:* \n{commits}\n*Hoy haré:* Continuar con el despliegue de infraestructura y revisión de dependencias."
-    }
+    # Estructura del reporte
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    report = f"""==================================================
+🤖 Standup Automático de Daedalus [{timestamp}]
+--------------------------------------------------
+*Ayer hice:* 
+{commits}
+
+*Hoy haré:* 
+Continuar con el despliegue de infraestructura y revisión de dependencias.
+==================================================\n\n"""
+
+    # Muestra el reporte en consola
+    print(report)
+
+    # Guarda el reporte en un archivo de texto local llamado 'standup_log.txt'
+    log_filename = "standup_log.txt"
+    with open(log_filename, "a", encoding="utf-8") as f:
+        f.write(report)
     
-    req = urllib.request.Request(
-        WEBHOOK_URL,
-        data=json.dumps(message).encode('utf-8'),
-        headers={'Content-Type': 'application/json'}
-    )
-    try:
-        urllib.request.urlopen(req)
-        print("Standup enviado con éxito.")
-    except Exception as e:
-        print(f"Error al enviar el standup: {e}")
+    print(f"Reporte guardado exitosamente en '{log_filename}'")
 
 if __name__ == "__main__":
-    print("Iniciando monitor de standup automático...")
-    # Se ejecutará en bucle revisando la hora (Ejemplo configurado para las 09:00 AM de lunes a viernes)
+    print("Iniciando monitor de standup local...")
+    
+    # Configurado para ejecutarse a una hora específica (Ejemplo: 09:00 AM)
     TARGET_HOUR = 9
     TARGET_MINUTE = 0
 
@@ -56,9 +60,7 @@ if __name__ == "__main__":
         now = datetime.now()
         # Lunes a Viernes (0 a 4) y hora exacta
         if now.weekday() < 5 and now.hour == TARGET_HOUR and now.minute == TARGET_MINUTE:
-            generate_fake_standup()
-            # Duerme 61 segundos para evitar múltiples envíos en el mismo minuto
-            time.sleep(61)
+            generate_local_standup()
+            time.sleep(61)  # Duerme un minuto para evitar duplicados
         else:
-            # Revisa cada 30 segundos
-            time.sleep(30)
+            time.sleep(30)  # Revisa el reloj cada 30 segundos
