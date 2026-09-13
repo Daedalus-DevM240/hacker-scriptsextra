@@ -1,6 +1,7 @@
 import subprocess
 import random
 import os
+import time
 
 TECHNICAL_TERMS = [
     "refactor: optimización de punteros de memoria y limpieza de descriptores de archivos huérfanos",
@@ -12,8 +13,6 @@ TECHNICAL_TERMS = [
 
 def create_fake_commit():
     commit_msg = random.choice(TECHNICAL_TERMS)
-    
-    # Crea un archivo temporal de log local para asegurar que haya cambios en el repo
     log_file = "system_diagnostic.log"
     with open(log_file, "a") as f:
         f.write(f"Diagnostic check executed at internal node.\n")
@@ -26,4 +25,9 @@ def create_fake_commit():
         print(f"Error al ejecutar git: {e}")
 
 if __name__ == "__main__":
-    create_fake_commit()
+    print("Iniciando servicio de commits automáticos en segundo plano...")
+    while True:
+        create_fake_commit()
+        # Espera 24 horas (86400 segundos) antes del siguiente commit
+        # Puedes cambiarlo a otro valor, por ejemplo, 3600 para 1 hora
+        time.sleep(86400)

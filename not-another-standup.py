@@ -4,8 +4,8 @@ import random
 import urllib.request
 import json
 from datetime import datetime, timedelta
+import time
 
-# Configura tu Webhook de Slack o Teams aquí o mediante variables de entorno
 WEBHOOK_URL = os.environ.get("STANDUP_WEBHOOK_URL", "https://hooks.slack.com/services/TU/WEBHOOK/REAL")
 
 CORPORATE_WORDS = [
@@ -47,4 +47,18 @@ def generate_fake_standup():
         print(f"Error al enviar el standup: {e}")
 
 if __name__ == "__main__":
-    generate_fake_standup()
+    print("Iniciando monitor de standup automático...")
+    # Se ejecutará en bucle revisando la hora (Ejemplo configurado para las 09:00 AM de lunes a viernes)
+    TARGET_HOUR = 9
+    TARGET_MINUTE = 0
+
+    while True:
+        now = datetime.now()
+        # Lunes a Viernes (0 a 4) y hora exacta
+        if now.weekday() < 5 and now.hour == TARGET_HOUR and now.minute == TARGET_MINUTE:
+            generate_fake_standup()
+            # Duerme 61 segundos para evitar múltiples envíos en el mismo minuto
+            time.sleep(61)
+        else:
+            # Revisa cada 30 segundos
+            time.sleep(30)
